@@ -23,7 +23,8 @@ resource "aws_subnet" "public" {
   availability_zone       = element(local.az_rule, count.index)
   map_public_ip_on_launch = var.map_public_ip_on_launch
    
-   tags = merge(var.default_tags, { Name = "Public Subnet ${count.index}" } ) #Adding new key "Name" and its value "Public Subnet ${count.index}" to default_tags
+   #Adding new key "Name" and its value "Public Subnet ${count.index}" to default_tags
+   tags = merge(var.default_tags, { Name = "Public Subnet ${count.index}" } ) 
 }
 
 resource "aws_subnet" "private" {
