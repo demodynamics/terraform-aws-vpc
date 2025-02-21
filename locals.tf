@@ -1,10 +1,13 @@
 locals {
-  /* Extracts 16 from "10.0.0.0/16" - Terraform's split() function splits a string into a list` ["10.0.0.0", "16"] based on a delimiter and  we access the second 
-  element using [1]. In this case, "/" is the delimiter. 
-  > split("/", "10.0.0.0/16")[1]   > tonumber(split("/", "10.0.0.0/16")[1]
-  "16"                             16                                       */
+  /* Extracts 16 from "10.0.0.0/16" - Terraform's split() function splits a string into a list` ["10.0.0.0", "16"] based on a delimiter and 
+   we access the second element using [1]. In this case, "/" is the delimiter. split("/", "10.0.0.0/16")[1] returns string "16", but tonumber() 
+   function makes it a number`16
+  split("/", "10.0.0.0/16")[1] > "16" and  tonumber(split("/", "10.0.0.0/16")[1]) > 16
+  */
   vpc_prefix_length = tonumber(split("/", var.vpc_cidr)[1])
-  subnet_cidrs = [for i in range(var.subnets_count) : cidrsubnet(var.vpc_cidr, var.subnet_prefix - local.vpc_prefix_length, i)]
+  
+  #Thsi for expression returns a list of strings` list of cidrs.
+  subnet_cidrs = [for i in range(var.subnets_count) : cidrsubnet(var.vpc_cidr, var.subnet_prefix - local.vpc_prefix_length, i)] 
 
   # coalesce(var.public_subnets_count, 0): If var.public_subnets_count is null, it returns 0.  
   # != 0 -  Ensures the value is not 0. his effectively checks that var.public_subnets_count is not null and not 0 in a more concise way.
