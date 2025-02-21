@@ -1,7 +1,7 @@
-my_vpc_name             = "VPC Name"
+project                 = "Project"
 vpc_cidr                = "10.0.0.0/16"
 subnets_count           = 2
-subnet_prefix           = 23
+subnet_prefix           = 24
 public_subnets_count    = 1
 private_subnets_count   = 1
 route_cidr              = "0.0.0.0/0"

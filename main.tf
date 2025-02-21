@@ -1,15 +1,24 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
 
 #------------- VPC -----------------
-resource "aws_vpc" "demo_vpc" {
+resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = var.vpc_dns
   enable_dns_hostnames = var.vpc_dns
-  tags = merge(var.default_tags, { Name = var.my_vpc_name})
+  tags = merge(var.default_tags, { Name = "${var.project} VPC"})
 }
 #---------------------------------------------Subnets--------------------------------------------
 resource "aws_subnet" "public" {
   count                   = local.set.public_cidr_count!=0?local.set.public_cidr_count:0
-  vpc_id                  = aws_vpc.demo_vpc.id
+  vpc_id                  = aws_vpc.main.id
   cidr_block              = local.public_subnet_cidrs[count.index]
   availability_zone       = element(local.az_rule, count.index)
   map_public_ip_on_launch = var.map_public_ip_on_launch
@@ -19,7 +28,7 @@ resource "aws_subnet" "public" {
 
 resource "aws_subnet" "private" {
   count             = local.set.private_cidr_count!=0?local.set.private_cidr_count:0 # If we have count attribute in resource, so it means that it is returns a list of resources, so we have list of that type of resources.
-  vpc_id            = aws_vpc.demo_vpc.id
+  vpc_id            = aws_vpc.main.id
   cidr_block        = local.private_subnet_cidrs[count.index]
   availability_zone = element(local.az_rule, count.index)
 
@@ -28,8 +37,8 @@ resource "aws_subnet" "private" {
 
 #----------------IGW--------------------
 resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.demo_vpc.id
-  tags = merge(var.default_tags, { Name = "Demo IGW" } )
+  vpc_id = aws_vpc.main.id
+  tags = merge(var.default_tags, { Name = "${var.project} NAT Gateway" } )
 }
 
 #--------Elastic IP (Static Public IP)-------
@@ -37,7 +46,7 @@ resource "aws_eip" "nat_eip" {
   count      = local.count_rule
   domain     = "vpc"
   depends_on = [ aws_internet_gateway.igw ]
-  tags = merge(var.default_tags, { Name = "Elastic IP ${count.index} for NAT ${count.index}" } )
+  tags = merge(var.default_tags, { Name = "Elastic IP ${count.index} for NAT Gateway ${count.index}" } )
 }
 
 #----------NAT Gateway------------------------------
@@ -51,7 +60,7 @@ resource "aws_nat_gateway" "nat" {
 #-------------Route Tables-----------------
 resource "aws_route_table" "private" {
   count  = local.count_rule
-  vpc_id = aws_vpc.demo_vpc.id
+  vpc_id = aws_vpc.main.id
 
   route {
      cidr_block     = var.route_cidr
@@ -62,7 +71,7 @@ resource "aws_route_table" "private" {
 
 resource "aws_route_table" "public" {
   count = length(aws_subnet.public) > 0 ? 1 : 0 # Creating 1 route table for public subnets
-  vpc_id = aws_vpc.demo_vpc.id
+  vpc_id = aws_vpc.main.id
 
   route {
      cidr_block     = var.route_cidr

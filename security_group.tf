@@ -1,5 +1,6 @@
 resource "aws_security_group" "demo_security_group" {
-    vpc_id = aws_vpc.demo_vpc.id
+    description = "${var.project} security group"
+    vpc_id = aws_vpc.main.id
 
     dynamic "ingress" {
         for_each = var.sg_ports
@@ -18,6 +19,7 @@ resource "aws_security_group" "demo_security_group" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 
-    tags = merge(var.default_tags, { Name = "${var.default_tags["Environment"]} Security Group" }) #Adding new key "Name" and its value "var.default_tags["Environment"]} Security Group" to default_tags, where var.default_tags["Environment"] takes value of Environment key from default.tags and put it in front of " Security Group".
+    #Adding new key "Name" and its value "var.default_tags["Environment"]} Security Group" to default_tags, where var.default_tags["Environment"] takes value of Environment key from default.tags and put it in front of " Security Group".
+    tags = merge(var.default_tags, { Name = "${var.default_tags["Environment"]} Security Group" }) 
   
 }
