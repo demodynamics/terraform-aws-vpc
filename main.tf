@@ -71,7 +71,7 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route_table" "public" {
-  count = length(aws_subnet.public) > 0 ? 1 : 0 # Creating 1 route table for public subnets
+  count = length(aws_subnet.public) > 0 ? 1 : 0 # Creating 1 route table for all public subnets
   vpc_id = aws_vpc.main.id
 
   route {
@@ -86,7 +86,7 @@ resource "aws_route_table" "public" {
 resource "aws_route_table_association" "public_association" {
   count          = local.set.public_cidr_count
   subnet_id      = aws_subnet.public[count.index].id 
-  route_table_id = aws_route_table.public[count.index].id
+  route_table_id = aws_route_table.public.id
 }
 
 resource "aws_route_table_association" "private_association" {
