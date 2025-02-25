@@ -79,3 +79,8 @@ variable "default_tags" {
   type = map(string)
   
 }
+
+variable "public_route_per_sub" {
+  description = "Create Public Route Table per Public Subnet"
+  type = bool
+}

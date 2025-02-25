@@ -71,7 +71,7 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route_table" "public" {
-  count = length(aws_subnet.public) > 0 ? 1 : 0 # Creating 1 route table for all public subnets
+  count = local.public_route_count
   vpc_id = aws_vpc.main.id
 
   route {
@@ -86,8 +86,56 @@ resource "aws_route_table" "public" {
 resource "aws_route_table_association" "public_association" {
   count          = local.set.public_cidr_count
   subnet_id      = aws_subnet.public[count.index].id 
-  route_table_id = aws_route_table.public.id
+  route_table_id = aws_route_table.public[count.index % local.public_route_count].id
 }
+
+/*
+When local.public_route_count = 1, it means there is only one route table (aws_route_table.public[0]).
+
+Behavior of count.index % 1
+count.index % 1 always results in 0 regardless of count.index because any number modulo 1 is always 0.
+
+Example Calculation:
+If count.index iterates over multiple subnets (count = local.set.public_cidr_count), let's see how % 1 behaves:
+
+count.index	   count.index % 1	     Selected aws_route_table.public Index
+0	             0 % 1 = 0	           aws_route_table.public[0]
+1	             1 % 1 = 0	           aws_route_table.public[0]
+2	             2 % 1 = 0	           aws_route_table.public[0]
+3	             3 % 1 = 0	           aws_route_table.public[0]
+n	             n % 1 = 0	           aws_route_table.public[0]
+
+Since public_route_count = 1, Terraform only creates one route table (aws_route_table.public[0]).
+Thus, every subnet will always be associated with aws_route_table.public[0].id.
+
+
+
+When local.public_route_count > 1, it means there will be more than one route table (aws_route_table.public[n]).
+ For example : local.public_route_count = 4
+
+Behavior of count.index % 1
+count.index % 1  will distribute subnets across multiple route tables.
+
+Example Calculation:
+If count.index iterates over multiple subnets (count = local.set.public_cidr_count), let's see how % 4 behaves:
+
+count.index	   count.index % 1	     Selected aws_route_table.public Index
+0	             0 % 4 = 0	           aws_route_table.public[0]
+1	             1 % 4 = 1	           aws_route_table.public[1]
+2	             2 % 4 = 2	           aws_route_table.public[2]
+3	             3 % 4 = 3	           aws_route_table.public[3]
+4	             4 % 4 = 3	           aws_route_table.public[0]
+5	             5 % 4 = 3	           aws_route_table.public[1]
+6	             6 % 4 = 2	           aws_route_table.public[2]
+7	             7 % 4 = 3	           aws_route_table.public[3]
+8	             8 % 4 = 0	           aws_route_table.public[0]
+9	             9 % 4 = 1	           aws_route_table.public[1]
+10	           10 % 4 = 2	           aws_route_table.public[2]
+11	           11 % 4 = 3	           aws_route_table.public[3]
+n	              n % 4 = 0 or 1 or 2 or 3  aws
+*/
+
+
 
 resource "aws_route_table_association" "private_association" {
   count          = local.count_rule!=0?local.set.private_cidr_count:0

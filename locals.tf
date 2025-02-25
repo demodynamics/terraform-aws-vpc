@@ -70,9 +70,14 @@ locals {
     public_cidr_count = length(local.public_subnet_cidrs)
     private_cidr_count = length(local.private_subnet_cidrs)
 
-
     }
   }
+
+
+
+
+
+
 
 locals {
    az_rule = local.nat_status.per_az?local.set.az_by_az_count:local.nat_status.per_subnet?local.set.az_by_subnet_count:local.nat_status.single_nat?local.set.az_by_subnet_count:local.set.az_by_subnet_count
@@ -82,3 +87,6 @@ locals {
    count_rule = local.nat_status.per_az?local.set.az_count:local.nat_status.per_subnet?min(local.set.public_cidr_count, local.set.private_cidr_count):local.nat_status.single_nat?1:0
 }
  
+ locals {
+     public_route_count = var.public_route_per_sub ? local.set.public_cidr_count : local.set.public_cidr_count > 1 ? 1 : 0
+ }

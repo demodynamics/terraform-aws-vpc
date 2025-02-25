@@ -8,6 +8,7 @@ route_cidr              = "0.0.0.0/0"
 az_count                = 2
 vpc_dns                 = true
 map_public_ip_on_launch = true
+public_route_per_sub    = false
 single_natgw            = false
 natgw_per_az            = false
 natgw_per_subnet        = false
