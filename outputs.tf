@@ -1,3 +1,17 @@
+output "vpc_data" {
+  value = {
+    "VPC ID" = aws_vpc.main.id
+    "VPC Inetrnet Gateway ID" = aws_internet_gateway.igw.id
+    "Subnet ID's"             = concat(aws_subnet.private[*].id, aws_subnet.public[*].id)
+    "Public Subnet ID"        = aws_subnet.public[*].id
+    "Public Subenet AZNames"  = aws_subnet.public[*].availability_zone
+    "Private Subnet ID"       = aws_subnet.private[*].id
+    "Private Subenet AZNames" = aws_subnet.private[*].availability_zone
+  }
+}
+
+
+/*
 output "vpc_id" {
   description = "VPC ID"
   value = aws_vpc.main.id
@@ -32,5 +46,5 @@ output "internet_gateway_id" {
   description = "VPC Inetrnet Gateway"
   value = aws_internet_gateway.igw.id
 }
-
+*/
 
