@@ -13,7 +13,7 @@ variable "route_cidr" {
   type = string  
 }
 
-variable "az_count" {
+variable "az_desired_count" {
   description = "The number of AZs to create in"
   type = number
   
